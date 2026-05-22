@@ -5,9 +5,8 @@ import xss from "xss";
 import validator from "validator";
 import AppError from "../utils/app-error";
 import catchAsync from "../utils/catch-async";
-import passport from "passport";
-import jwt from "jsonwebtoken";
 import { hashPin } from "../utils/hash-password";
+import { generateUniqueUsername } from "../utils/generate-username";
 
 export const signup = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -37,12 +36,21 @@ export const signup = catchAsync(
       );
     }
 
+    async function findUserByUsername(username: string) {
+      return await User.findOne({ username });
+    }
+
+    const username = await generateUniqueUsername(fullName, findUserByUsername);
+
     const hashed = await hashPin(password);
 
     const user = await User.create({
       email,
       fullName: xss(fullName),
       password: hashed,
+      username,
+      following: [],
+      followers: [],
     });
 
     await user.save();
@@ -50,33 +58,6 @@ export const signup = catchAsync(
     return createSendToken(user, 200, res);
   },
 );
-
-export const googleAuth = passport.authenticate("google", {
-  scope: ["profile", "email"],
-});
-
-export const googleAuthCallback = [
-  passport.authenticate("google", {
-    failureRedirect: `https://geofly-frontend-dun.vercel.app/login`,
-    session: false,
-  }),
-  async (req: Request, res: Response) => {
-    const user: any = req.user;
-
-    if (!user) {
-      return res.redirect(`https://geofly-frontend-dun.vercel.app/login`);
-    }
-    const JWT_SECRET = process.env.JWT_SECRET as string;
-    const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN as string;
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN as any,
-    });
-
-    res.redirect(
-      `https://geofly-frontend-dun.vercel.app?token=${token}&email=${user.email}&name=${user.fullName}`,
-    );
-  },
-];
 
 export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -99,8 +80,6 @@ export const login = catchAsync(async (req, res, next) => {
   user.passwordChangedAt = undefined;
   user.passwordResetExpires = undefined;
   user.passwordResetToken = undefined;
-  user.provider = undefined;
-  user.googleId = undefined;
 
   createSendToken(user, 200, res);
 });

@@ -12,6 +12,7 @@ dotenv.config();
 
 import globalErrorController from "./controllers/error.controller";
 import authRoute from "./routers/auth.router";
+import userRoute from "./routers/user.router";
 import passport from "passport";
 import "./utils/passport";
 import AppError from "./utils/app-error";
@@ -86,6 +87,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/user", userRoute);
 
 app.all(/.*/, (req: Request, res: Response, next: NextFunction) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));

@@ -7,9 +7,10 @@ export interface IUser extends Document {
   fullName: string;
   email: string;
   provider: string | undefined;
-  googleId: string | undefined;
+  username: string | undefined;
   password: string | undefined;
-
+  followers: any[];
+  following: any[];
   passwordChangedAt?: Date;
   passwordResetExpires?: Date;
   passwordResetToken?: string;
@@ -32,8 +33,21 @@ const schema = new mongoose.Schema<IUser>(
       validate: [validator.isEmail, "enter a valid email address"],
     },
 
-    provider: { type: String, trim: true, default: "" },
-    googleId: { type: String, trim: true, default: "" },
+    username: { type: String, trim: true, default: "" },
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: false,
+      },
+    ],
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: false,
+      },
+    ],
 
     password: {
       type: String,
