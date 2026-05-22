@@ -72,7 +72,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("<h1>WELCOME TO GOLAFLY</h1>");
+  res.send("<h1>WELCOME TO ABBEY MORTGAGE</h1>");
 });
 
 app.use((req: Request, res: Response, next: NextFunction) => {
