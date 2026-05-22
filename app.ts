@@ -13,8 +13,7 @@ dotenv.config();
 import globalErrorController from "./controllers/error.controller";
 import authRoute from "./routers/auth.router";
 import userRoute from "./routers/user.router";
-import passport from "passport";
-import "./utils/passport";
+
 import AppError from "./utils/app-error";
 
 const app = express();
@@ -23,7 +22,7 @@ console.log("🔥 APP FILE IS RUNNING");
 
 const allowedOrigins: string[] = [
   "http://localhost:5173",
-  "https://geofly-frontend-dun.vercel.app",
+  "https://abbey-mortgage-frontend.vercel.app",
 ];
 
 app.use(
@@ -61,9 +60,6 @@ app.use(
     saveUninitialized: false,
   }),
 );
-
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
