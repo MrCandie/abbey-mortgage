@@ -40,7 +40,14 @@ export const unfollow = catchAsync(
     const currentUser = req.user;
 
     // ensure current user is actually following target user
-    if (!user.followers.includes(currentUser.id)) {
+    if (
+      !user.followers
+        ?.map((el) => String(el))
+        .includes(String(currentUser.id)) &&
+      !currentUser.following
+        ?.map((el: any) => String(el))
+        .includes(String(user.id))
+    ) {
       return next(new AppError(`You are not following ${username}`, 400));
     }
 
@@ -175,6 +182,29 @@ export const getFollowing = catchAsync(
         followers: followersWithStatus,
         following: followingWithStatus,
       },
+    });
+  },
+);
+
+export const updateProfile = catchAsync(
+  async (req: any, res: Response, next: NextFunction) => {
+    if (!req.body) return next(new AppError("Invalid parameter", 400));
+    const { fullName, username, bio } = req.body;
+    if (username !== req.user.username) {
+      const usernameExists = await User.findOne({ username });
+      if (usernameExists)
+        return next(new AppError("username already taken", 400));
+    }
+
+    await User.findByIdAndUpdate(req.user.id, {
+      fullName,
+      username,
+      bio,
+    });
+
+    return res.status(200).json({
+      status: "success",
+      data: "profile updated",
     });
   },
 );
